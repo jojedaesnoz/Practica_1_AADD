@@ -1,8 +1,14 @@
 package com.company;
 
+import com.company.control.Controlador;
+import com.company.datos.Modelo;
+import com.company.ui.Vista;
+
 public class Main {
 
     public static void main(String[] args) {
-	// write your code here
+	    Modelo modelo = new Modelo();
+	    Vista vista = new Vista();
+	    Controlador controlador = new Controlador(modelo, vista);
     }
 }
