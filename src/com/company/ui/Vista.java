@@ -6,14 +6,12 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Vista extends JFrame {
-    private JPanel panelInformacion, panelBotones;
-    private JScrollPane panelPeliculas;
-    private DefaultListModel<Pelicula> modeloPeliculas;
-    private JList<Pelicula> listaPeliculas;
-    private JButton btNuevo, btGuardar, btModificar, btCancelar, btEliminar;
-    private JTextField tfTitulo, tfValoracion, tfRecaudacion;
-    private JTextArea taSinopsis;
-    private JLabel lImagen;
+    public DefaultListModel<Pelicula> modeloPeliculas;
+    public JList<Pelicula> listaPeliculas;
+    public JButton btNuevo, btGuardar, btModificar, btCancelar, btEliminar;
+    public JTextField tfTitulo, tfValoracion, tfRecaudacion;
+    public JTextArea taSinopsis;
+    public JLabel lImagen;
 
     public Vista() {
         inicializarComponentes();
@@ -41,8 +39,7 @@ public class Vista extends JFrame {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        // COLOCAR
-
+        // Crear labels y bordes
         JLabel lTitulo = new JLabel("Título", SwingConstants.CENTER);
         JLabel lSinopsis = new JLabel("Sinopsis", SwingConstants.CENTER);
         JLabel lValoracion = new JLabel("Valoración", SwingConstants.CENTER);
@@ -84,7 +81,7 @@ public class Vista extends JFrame {
         gbc.gridy++;
         contenedor.add(lRecaudacion, gbc);
 
-        // Poner entradas
+        // ENTRADAS
         gbc.gridx = 1;
         gbc.gridy = 1;
         contenedor.add(tfTitulo, gbc);
@@ -101,6 +98,9 @@ public class Vista extends JFrame {
 
         gbc.gridy++;
         contenedor.add(tfRecaudacion, gbc);
+
+        // CAJAS DE ERROR
+
 
         // LISTA
         add(contenedor);

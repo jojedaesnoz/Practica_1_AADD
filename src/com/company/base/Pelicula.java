@@ -1,6 +1,8 @@
 package com.company.base;
 
-public class Pelicula {
+import java.io.Serializable;
+
+public class Pelicula implements Serializable {
 
     private int id;
     private String titulo;
@@ -47,5 +49,18 @@ public class Pelicula {
 
     public void setRutaImagen(String rutaImagen) {
         this.rutaImagen = rutaImagen;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return titulo;
     }
 }
