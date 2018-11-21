@@ -25,7 +25,7 @@ public class Vista extends JFrame {
         taSinopsis = new JTextArea();
         tfValoracion = new JTextField();
         tfRecaudacion = new JTextField();
-        lImagen = new JLabel("IMAGEN");
+        lImagen = new JLabel();
 
         btNuevo = new JButton("Nuevo");
         btGuardar = new JButton("Guardar");

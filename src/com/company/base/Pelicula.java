@@ -1,5 +1,6 @@
 package com.company.base;
 
+import java.io.File;
 import java.io.Serializable;
 
 public class Pelicula implements Serializable {
@@ -9,7 +10,7 @@ public class Pelicula implements Serializable {
     private String sinopsis;
     private int valoracion;
     private float recaudacion;
-    private String rutaImagen;
+    private File imagen;
 
     public String getTitulo() {
         return titulo;
@@ -43,12 +44,12 @@ public class Pelicula implements Serializable {
         this.recaudacion = recaudacion;
     }
 
-    public String getRutaImagen() {
-        return rutaImagen;
+    public File getImagen() {
+        return imagen;
     }
 
-    public void setRutaImagen(String rutaImagen) {
-        this.rutaImagen = rutaImagen;
+    public void setImagen(File imagen) {
+        this.imagen = new File(imagen.getPath());
     }
 
     public int getId() {
