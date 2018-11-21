@@ -84,11 +84,6 @@ public class Modelo {
         return peliculas;
     }
 
-//    public void eliminarPelicula(Pelicula pelicula) throws IOException {
-//        if(peliculas.remove(pelicula))
-//            guardarADisco();
-//    }
-
     public void eliminarPelicula(Pelicula peliculaABorrar) throws IOException {
         // Comprobar que existe antes de intentar borrar
         Pelicula pelicula = buscarPeliculaPorID(peliculaABorrar.getId());
