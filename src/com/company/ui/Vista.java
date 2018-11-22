@@ -4,34 +4,74 @@ import com.company.base.Pelicula;
 
 import javax.swing.*;
 import java.awt.*;
+import java.time.Year;
 
 public class Vista extends JFrame {
+
+    // LISTA
     public DefaultListModel<Pelicula> modeloPeliculas;
     public JList<Pelicula> listaPeliculas;
-    public JButton btNuevo, btGuardar, btModificar, btCancelar, btEliminar;
-    public JTextField tfTitulo, tfValoracion, tfRecaudacion;
+
+    // BOTONES
+    public JButton btNuevo, btGuardar, btModificar, btCancelar, btEliminar, btDeshacer, btEliminarTodo;
+
+    // LABELS CAJAS E IMAGEN
+    private JLabel lTitulo, lSinopsis, lValoracion, lRecaudacion;
+    public JTextField tfTitulo, tfValoracion, tfRecaudacion, tfBusqueda;
     public JTextArea taSinopsis;
     public JLabel lImagen;
 
     public Vista() {
         inicializarComponentes();
+        darTamsYBordes();
         colocarComponentes();
         crearPanelBotones();
         prepararVentana();
     }
 
     private void inicializarComponentes() {
+
+        // LABELS
+        lTitulo = new JLabel("Título", SwingConstants.CENTER);
+        lSinopsis = new JLabel("Sinopsis", SwingConstants.CENTER);
+        lValoracion = new JLabel("Valoración", SwingConstants.CENTER);
+        lRecaudacion = new JLabel("Recaudación", SwingConstants.CENTER);
+
+        // CAJAS
         tfTitulo = new JTextField();
         taSinopsis = new JTextArea();
         tfValoracion = new JTextField();
         tfRecaudacion = new JTextField();
+        tfBusqueda = new JTextField();
+
+        // IMAGEN
         lImagen = new JLabel();
 
+        // BOTONES
         btNuevo = new JButton("Nuevo");
         btGuardar = new JButton("Guardar");
         btModificar = new JButton("Modificar");
         btCancelar = new JButton("Cancelar");
         btEliminar = new JButton("Eliminar");
+        btDeshacer = new JButton("Deshacer");
+        btEliminarTodo = new JButton("Eliminar Todo");
+    }
+
+    private void darTamsYBordes() {
+        // LABELS
+        for (JLabel label: new JLabel[]{lTitulo, lSinopsis, lValoracion, lRecaudacion}){
+            label.setPreferredSize(new Dimension(80, 30));
+        }
+
+        // CAJAS
+        for (JComponent entrada: new JComponent[]{tfTitulo, tfValoracion, tfRecaudacion, tfBusqueda}) {
+            entrada.setPreferredSize(new Dimension(150, 25));
+            entrada.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        }
+        taSinopsis.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+
+        // IMAGEN
+        lImagen.setMinimumSize(new Dimension(200, 100));
     }
 
     private void colocarComponentes(){
@@ -39,35 +79,22 @@ public class Vista extends JFrame {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        // Crear labels y bordes
-        JLabel lTitulo = new JLabel("Título", SwingConstants.CENTER);
-        JLabel lSinopsis = new JLabel("Sinopsis", SwingConstants.CENTER);
-        JLabel lValoracion = new JLabel("Valoración", SwingConstants.CENTER);
-        JLabel lRecaudacion = new JLabel("Recaudación", SwingConstants.CENTER);
-
-        // DAR TAMS Y BORDES
-        for (JLabel label: new JLabel[]{lTitulo, lSinopsis, lValoracion, lRecaudacion}){
-            label.setPreferredSize(new Dimension(80, 30));
-        }
-        for (JComponent entrada: new JComponent[]{tfTitulo, tfValoracion, tfRecaudacion}) {
-            entrada.setPreferredSize(new Dimension(150, 25));
-            entrada.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-        }
-        taSinopsis.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-
         // IMAGEN
         lImagen.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
+        gbc.gridheight = 2;
+        int posicionPostImagen = gbc.gridheight + 1;
         gbc.fill = GridBagConstraints.BOTH;
         contenedor.add(lImagen, gbc);
         gbc.gridwidth = 1;
+        gbc.gridheight = 1;
         gbc.fill = GridBagConstraints.NONE;
 
         // ETIQUETAS
         gbc.gridx = 0;
-        gbc.gridy = 1;
+        gbc.gridy = posicionPostImagen;
         contenedor.add(lTitulo, gbc);
 
         gbc.gridy++;
@@ -83,7 +110,7 @@ public class Vista extends JFrame {
 
         // ENTRADAS
         gbc.gridx = 1;
-        gbc.gridy = 1;
+        gbc.gridy = posicionPostImagen;
         contenedor.add(tfTitulo, gbc);
 
         gbc.weighty = 1;
@@ -101,21 +128,56 @@ public class Vista extends JFrame {
 
         // CAJAS DE ERROR
 
-
-        // LISTA
-        add(contenedor);
-        JScrollPane panelPeliculas = crearPanelPeliculas();
-        gbc.weightx = 1;
+        // CAJA DE BUSQUEDA
         gbc.gridx = 2;
         gbc.gridy = 0;
-        gbc.gridheight = 5;
+        gbc.gridheight = 1;
+        gbc.gridwidth = 1;
+        gbc.weightx = 1;
+        gbc.fill = GridBagConstraints.BOTH;
+        contenedor.add(tfBusqueda, gbc);
+
+        // LISTA
+        JScrollPane panelPeliculas = crearScrollPeliculas();
+        gbc.weighty = 1;
+        gbc.gridx = 2;
+        gbc.gridy = 1;
+        gbc.gridheight = 9;
         gbc.fill = GridBagConstraints.BOTH;
         contenedor.add(panelPeliculas, gbc);
+
+        // Colocar el panel
+        add(contenedor);
+
+
+
+//        JPanel panelPeliculas = new JPanel();
+//        SpringLayout layout = new SpringLayout();
+//        panelPeliculas.setLayout(layout);
+//        JScrollPane scrollPeliculas = crearScrollPeliculas();
+//
+//
+//
+//        layout.putConstraint(SpringLayout.NORTH, tfBusqueda, 0, SpringLayout.NORTH, panelPeliculas);
+//        layout.putConstraint(SpringLayout.EAST, tfBusqueda, 0, SpringLayout.EAST, panelPeliculas);
+//        layout.putConstraint(SpringLayout.NORTH, scrollPeliculas, 0, SpringLayout.SOUTH, tfBusqueda);
+//        layout.putConstraint(SpringLayout.EAST, scrollPeliculas, 0, SpringLayout.EAST, panelPeliculas);
+//        panelPeliculas.add(tfBusqueda);
+//        panelPeliculas.add(scrollPeliculas);
+//
+//        gbc.weightx = 1;
+//        gbc.gridx = 2;
+//        gbc.gridy = 0;
+//        gbc.gridheight = 5;
+//        gbc.fill = GridBagConstraints.BOTH;
+//        contenedor.add(panelPeliculas, gbc);
+
     }
 
     private void prepararVentana() {
-        setSize(550, 300);
-        setMinimumSize(new Dimension(550, 300));
+        Dimension dimensiones = new Dimension(800, 500);
+        setSize(dimensiones);
+        setMinimumSize(dimensiones);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setVisible(true);
@@ -124,7 +186,8 @@ public class Vista extends JFrame {
     private void crearPanelBotones() {
 
         JPanel botonera = new JPanel();
-        JButton[] botones = {btNuevo, btGuardar, btModificar, btCancelar, btEliminar};
+        JButton[] botones = {btNuevo, btGuardar, btModificar, btCancelar,
+                btEliminar, btDeshacer, btEliminarTodo};
 
         botonera.setLayout(new GridLayout(1, botones.length));
         for (JButton boton: botones)
@@ -133,7 +196,7 @@ public class Vista extends JFrame {
         add(botonera, BorderLayout.SOUTH);
     }
 
-    private JScrollPane crearPanelPeliculas() {
+    private JScrollPane crearScrollPeliculas() {
         modeloPeliculas = new DefaultListModel<>();
         listaPeliculas = new JList<>(modeloPeliculas);
         return new JScrollPane(listaPeliculas);
