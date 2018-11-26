@@ -33,6 +33,10 @@ public class Modelo {
     }
 
     public void guardarPelicula(Pelicula nueva) throws IOException {
+        guardarPelicula(nueva, RUTA_PELICULAS);
+    }
+
+    public void guardarPelicula(Pelicula nueva, String destino) throws IOException {
 
         // Construir la imagen de destino
         File imagenFuente = nueva.getImagen();
@@ -54,7 +58,7 @@ public class Modelo {
             nueva.setId(ultimoID);
         }
         peliculas.add(nueva);
-        guardarADisco();
+        guardarADisco(destino);
     }
 
     private Pelicula buscarPeliculaPorID(int id) {
@@ -72,8 +76,8 @@ public class Modelo {
         peliculas = Util.deserialize(RUTA_PELICULAS);
     }
 
-    private void guardarADisco() throws IOException {
-        Util.serialize(RUTA_PELICULAS, peliculas);
+    private void guardarADisco(String destino) throws IOException {
+        Util.serialize(destino, peliculas);
     }
 
     public List<Pelicula> getPeliculas() {
@@ -85,17 +89,14 @@ public class Modelo {
 
         // Buscar las peliculas que cumplan el criterio
         for (Pelicula pelicula: peliculas) {
-            if (pelicula.getTitulo().matches(busqueda)) {
+            String titulo = pelicula.getTitulo().toLowerCase();
+            if (titulo.contains(busqueda.toLowerCase())) {
                 peliculasADevolver.add(pelicula);
             }
         }
 
         // Devolver el resultado
-        if (peliculasADevolver.size() > 0) {
-            return peliculasADevolver;
-        } else {
-            return null;
-        }
+        return peliculasADevolver;
     }
 
     public void eliminarPelicula(Pelicula peliculaABorrar) throws IOException {
@@ -106,7 +107,7 @@ public class Modelo {
 
         ultimaBorrada = pelicula;
         peliculas.remove(pelicula);
-        guardarADisco();
+//        guardarADisco();
     }
 
     private void limpiarImagenesSobrantes(){
@@ -114,6 +115,7 @@ public class Modelo {
         for (Pelicula pelicula: peliculas) {
             imagenesUsadas.add(pelicula.getImagen());
         }
+
         for (File imagen:  new File(RUTA_IMAGENES).listFiles()) {
             if (!imagenesUsadas.contains(imagen))
                 imagen.delete();

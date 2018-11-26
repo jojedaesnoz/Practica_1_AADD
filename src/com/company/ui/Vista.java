@@ -13,7 +13,7 @@ public class Vista extends JFrame {
     public JList<Pelicula> listaPeliculas;
 
     // BOTONES
-    public JButton btNuevo, btGuardar, btModificar, btCancelar, btEliminar, btDeshacer, btEliminarTodo;
+    public JButton btNuevo, btGuardar, btGuardarComo, btModificar, btCancelar, btEliminar, btDeshacer, btEliminarTodo;
 
     // LABELS CAJAS E IMAGEN
     private JLabel lTitulo, lSinopsis, lValoracion, lRecaudacion;
@@ -50,6 +50,7 @@ public class Vista extends JFrame {
         // BOTONES
         btNuevo = new JButton("Nuevo");
         btGuardar = new JButton("Guardar");
+        btGuardarComo = new JButton("Guardar Como");
         btModificar = new JButton("Modificar");
         btCancelar = new JButton("Cancelar");
         btEliminar = new JButton("Eliminar");
@@ -148,30 +149,6 @@ public class Vista extends JFrame {
 
         // Colocar el panel
         add(contenedor);
-
-
-
-//        JPanel panelPeliculas = new JPanel();
-//        SpringLayout layout = new SpringLayout();
-//        panelPeliculas.setLayout(layout);
-//        JScrollPane scrollPeliculas = crearScrollPeliculas();
-//
-//
-//
-//        layout.putConstraint(SpringLayout.NORTH, tfBusqueda, 0, SpringLayout.NORTH, panelPeliculas);
-//        layout.putConstraint(SpringLayout.EAST, tfBusqueda, 0, SpringLayout.EAST, panelPeliculas);
-//        layout.putConstraint(SpringLayout.NORTH, scrollPeliculas, 0, SpringLayout.SOUTH, tfBusqueda);
-//        layout.putConstraint(SpringLayout.EAST, scrollPeliculas, 0, SpringLayout.EAST, panelPeliculas);
-//        panelPeliculas.add(tfBusqueda);
-//        panelPeliculas.add(scrollPeliculas);
-//
-//        gbc.weightx = 1;
-//        gbc.gridx = 2;
-//        gbc.gridy = 0;
-//        gbc.gridheight = 5;
-//        gbc.fill = GridBagConstraints.BOTH;
-//        contenedor.add(panelPeliculas, gbc);
-
     }
 
     private void prepararVentana() {
@@ -186,7 +163,7 @@ public class Vista extends JFrame {
     private void crearPanelBotones() {
 
         JPanel botonera = new JPanel();
-        JButton[] botones = {btNuevo, btGuardar, btModificar, btCancelar,
+        JButton[] botones = {btNuevo, btGuardar, btGuardarComo, btModificar, btCancelar,
                 btEliminar, btDeshacer, btEliminarTodo};
 
         botonera.setLayout(new GridLayout(1, botones.length));
