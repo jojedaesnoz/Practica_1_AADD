@@ -7,5 +7,5 @@ public class Constantes {
     public static final String RUTA_IMAGENES = RUTA_DATOS + File.separator + "images";
     public static final String RUTA_PELICULAS = RUTA_DATOS + File.separator + "peliculas.dat";
     public static final String RUTA_DEFAULT = RUTA_DATOS + File.separator + "default";
-    public static final String DEFAULT_IMAGE = RUTA_DEFAULT + File.separator +  "default_image.jpg";
+//    public static final String DEFAULT_IMAGE = RUTA_DEFAULT + File.separator +  "default_image.jpg";
 }

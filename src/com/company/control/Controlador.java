@@ -18,7 +18,6 @@ import java.util.List;
 
 import static com.company.control.Controlador.Origen.MODIFICAR;
 import static com.company.control.Controlador.Origen.NUEVO;
-import static com.company.util.Constantes.DEFAULT_IMAGE;
 import static javax.swing.JOptionPane.OK_OPTION;
 
 public class Controlador implements ActionListener, MouseListener, DocumentListener {
@@ -39,7 +38,7 @@ public class Controlador implements ActionListener, MouseListener, DocumentListe
 
         // Establecer el estado por defecto de la aplicacion
         modoEdicion(false);
-        colocarImagen(new File(DEFAULT_IMAGE));
+        colocarImagen(modelo.getDefaultImage());
         vista.btDeshacer.setEnabled(false);
         refrescarLista(modelo.getPeliculas());
     }
@@ -158,7 +157,7 @@ public class Controlador implements ActionListener, MouseListener, DocumentListe
                 0 : Integer.parseInt(vista.tfValoracion.getText());
         recaudacion = vista.tfRecaudacion.getText().isEmpty() ?
                 0 : Float.parseFloat(vista.tfRecaudacion.getText());
-        imagen = imagenSeleccionada != null? imagenSeleccionada : new File(DEFAULT_IMAGE);
+        imagen = imagenSeleccionada != null? imagenSeleccionada : modelo.getDefaultImage();
 
         // Construir la pelicula y devolverla
         Pelicula pelicula = new Pelicula();
@@ -287,7 +286,7 @@ public class Controlador implements ActionListener, MouseListener, DocumentListe
             textField.setText("");
         }
         vista.taSinopsis.setText("");
-        colocarImagen(new File(DEFAULT_IMAGE));
+        colocarImagen(modelo.getDefaultImage());
     }
 
     private void cargarPelicula(Pelicula pelicula) {
@@ -300,7 +299,7 @@ public class Controlador implements ActionListener, MouseListener, DocumentListe
 
         // Colocar la imagen de la pelicula si tiene y si no, la imagen por defecto
         colocarImagen(pelicula.getImagen().exists() ?
-                pelicula.getImagen() : new File(DEFAULT_IMAGE));
+                pelicula.getImagen() : modelo.getDefaultImage());
     }
 
     private void colocarImagen(File imagen) {

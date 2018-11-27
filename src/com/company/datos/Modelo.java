@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.company.util.Constantes.DEFAULT_IMAGE;
 import static com.company.util.Constantes.RUTA_IMAGENES;
 import static com.company.util.Constantes.RUTA_PELICULAS;
 
@@ -130,6 +131,10 @@ public class Modelo {
             return ficheroAlmacenamiento.delete();
         }
         return false;
+    }
+
+    public File getDefaultImage() {
+        return new File(DEFAULT_IMAGE);
     }
 
 }
