@@ -7,12 +7,13 @@ import com.company.ui.Vista;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.text.BadLocationException;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 
 import static com.company.control.Controlador.Origen.MODIFICAR;
@@ -34,76 +35,13 @@ public class Controlador implements ActionListener, MouseListener, DocumentListe
     public Controlador(Modelo modelo, Vista vista) {
         this.modelo = modelo;
         this.vista = vista;
-        modoEdicion(false);
         addListeners();
+
+        // Establecer el estado por defecto de la aplicacion
+        modoEdicion(false);
         colocarImagen(new File(DEFAULT_IMAGE));
         vista.btDeshacer.setEnabled(false);
         refrescarLista(modelo.getPeliculas());
-    }
-    //Todo: poner que guarde las fotos y las cargue desde disco
-
-    private void guardarPelicula() {
-        // Recoger los datos con su verificacion de que son buenos
-        Pelicula pelicula = cogerDatosPelicula();
-        if (pelicula == null)
-            return;
-
-        if (origen == MODIFICAR)
-            pelicula.setId(idPeliculaSeleccionada);
-
-        // Guardar
-        try {
-            modelo.guardarPelicula(pelicula);
-            origen = null;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void guardarPelicula(String destino) {
-        // Recoger los datos con su verificacion de que son buenos
-        Pelicula pelicula = cogerDatosPelicula();
-        if (pelicula == null)
-            return;
-
-        if (origen == MODIFICAR)
-            pelicula.setId(idPeliculaSeleccionada);
-
-        // Guardar
-        try {
-            modelo.guardarPelicula(pelicula, destino);
-            origen = null;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void refrescarLista(List<Pelicula> lista) {
-        vista.modeloPeliculas.removeAllElements();
-        for (Pelicula pelicula: lista) {
-            vista.modeloPeliculas.addElement(pelicula);
-        }
-    }
-
-    private void eliminarPelicula() {
-        try {
-            Pelicula peliculaSeleccionada = vista.listaPeliculas.getSelectedValue();
-            modelo.eliminarPelicula(peliculaSeleccionada);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void modoEdicion(boolean modo){
-        // Activar/desactivar botones
-        vista.btGuardar.setEnabled(modo);
-        vista.btCancelar.setEnabled(modo);
-
-        // Activar/desactivar campos
-        vista.tfTitulo.setEnabled(modo);
-        vista.taSinopsis.setEnabled(modo);
-        vista.tfValoracion.setEnabled(modo);
-        vista.tfRecaudacion.setEnabled(modo);
     }
 
     private void configurarModo(String actionCommand) {
@@ -132,32 +70,53 @@ public class Controlador implements ActionListener, MouseListener, DocumentListe
         // Realiza la accion correspondiente a cada boton
         switch (e.getActionCommand()) {
             case "Nuevo":
+
                 origen = NUEVO;
                 vaciarCajas();
                 break;
+
             case "Modificar":
-                cargarPelicula(vista.listaPeliculas.getSelectedValue());
+
                 origen = MODIFICAR;
+                cargarPelicula(vista.listaPeliculas.getSelectedValue());
                 break;
+
             case "Guardar":
-                guardarPelicula();
+
+                // Recoger la pelicula y si no hay errores, guardarla
+                Pelicula pelicula;
+                if (null != (pelicula = cogerDatosPelicula())) {
+                    guardarPelicula(pelicula);
+                }
                 break;
+
             case "Guardar Como":
+
+                // Coger el directorio de salida
                 JFileChooser jfc = new JFileChooser();
                 jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                if (jfc.showOpenDialog(null) == JFileChooser.CANCEL_OPTION)
+                if (jfc.showOpenDialog(null) == JFileChooser.CANCEL_OPTION) {
                     return;
-                String rutaSeleccionada = jfc.getSelectedFile().getPath();
-                guardarPelicula(rutaSeleccionada + File.separator + "peliculas.dat");
+                }
+
+                // Construir la ruta de destino con el directorio seleccionado
+                String rutaSeleccionada = jfc.getSelectedFile().getPath()
+                        + File.separator + "peliculas.dat";
+                if (null != (pelicula = cogerDatosPelicula())) {
+                    guardarPelicula(pelicula, rutaSeleccionada);
+                }
+
             case "Cancelar":
+
                 vaciarCajas();
                 break;
+
             case "Eliminar":
                 eliminarPelicula();
                 vista.btDeshacer.setEnabled(true);
                 break;
             case "Deshacer":
-                deshacerBorrado();
+                deshacerUltimoBorrado();
                 vista.btDeshacer.setEnabled(false);
                 break;
             case "Eliminar Todo":
@@ -172,10 +131,85 @@ public class Controlador implements ActionListener, MouseListener, DocumentListe
             default:
                 break;
         }
+
+        // Haga lo que haga, refresca la lista
         refrescarLista(modelo.getPeliculas());
     }
 
-    private void deshacerBorrado() {
+
+    /*
+    Metodo para recoger los datos de las cajas de texto e imagen
+    Comprueba que la pelicula tenga un titulo, porque lo hemos definido como necesario
+    El resto de campos reciben valores por defecto si no estan completos
+     */
+    private Pelicula cogerDatosPelicula(){
+        String titulo, sinopsis;
+        int valoracion;
+        float recaudacion;
+        File imagen;
+
+        if (vista.tfTitulo.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(vista, "El título es necesario", "Error", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+        titulo = vista.tfTitulo.getText();
+        sinopsis = vista.taSinopsis.getText();
+        valoracion = vista.tfValoracion.getText().isEmpty() ?
+                0 : Integer.parseInt(vista.tfValoracion.getText());
+        recaudacion = vista.tfRecaudacion.getText().isEmpty() ?
+                0 : Float.parseFloat(vista.tfRecaudacion.getText());
+        imagen = imagenSeleccionada != null? imagenSeleccionada : new File(DEFAULT_IMAGE);
+
+        // Construir la pelicula y devolverla
+        Pelicula pelicula = new Pelicula();
+        pelicula.setTitulo(titulo);
+        pelicula.setSinopsis(sinopsis);
+        pelicula.setValoracion(valoracion);
+        pelicula.setRecaudacion(recaudacion);
+        pelicula.setImagen(imagen);
+
+        // Si se trata de una modificacion, conserva el ID
+        if (origen.equals(MODIFICAR)) {
+            pelicula.setId(idPeliculaSeleccionada);
+        }
+        return pelicula;
+    }
+
+
+    /****************************
+     *                           *
+     *   METODOS DEL MODELO      *
+     *                           *
+     ****************************/
+
+    private void guardarPelicula(Pelicula pelicula) {
+        try {
+            modelo.guardarPelicula(pelicula);
+            origen = null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void guardarPelicula(Pelicula pelicula, String destino) {
+        try {
+            modelo.guardarPelicula(pelicula, destino);
+            origen = null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void eliminarPelicula() {
+        try {
+            Pelicula peliculaSeleccionada = vista.listaPeliculas.getSelectedValue();
+            modelo.eliminarPelicula(peliculaSeleccionada);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void deshacerUltimoBorrado() {
         try {
             Pelicula borrada = modelo.getUltimaBorrada();
             modelo.guardarPelicula(borrada);
@@ -186,39 +220,64 @@ public class Controlador implements ActionListener, MouseListener, DocumentListe
     }
 
     private void addListeners() {
-        // BOTONES
+        // BOTONES: ActionListener
         JButton[] botones = {vista.btNuevo, vista.btModificar, vista.btGuardar, vista.btGuardarComo,
                 vista.btCancelar, vista.btEliminar, vista.btDeshacer, vista.btEliminarTodo};
         for (JButton boton: botones) {
             boton.addActionListener(this);
         }
 
-        // IMAGEN
-        vista.lImagen.addMouseListener(this);
-
-        // TEXTO EN BUSQUEDA
+        // TEXTO EN BUSQUEDA: DocumentListener
         vista.tfBusqueda.getDocument().addDocumentListener(this);
 
-        // CLICK EN LISTA
+        // IMAGEN: MouseListener
+        vista.lImagen.addMouseListener(this);
+
+        // CLICK EN LISTA: MouseListener
         vista.listaPeliculas.addMouseListener(this);
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
         if (e.getComponent().equals(vista.listaPeliculas)) {
-
-            // CLICK EN LA LISTA
+            // Click en la lista
             cargarPelicula(vista.listaPeliculas.getSelectedValue());
             idPeliculaSeleccionada = vista.listaPeliculas.getSelectedValue().getId();
 
         } else if (e.getComponent().equals(vista.lImagen)) {
-            // CLICK EN LA IMAGEN
+            // Click en la imagen
             JFileChooser jfc = new JFileChooser();
             if (jfc.showOpenDialog(null) == JFileChooser.CANCEL_OPTION)
                 return;
 
             imagenSeleccionada = jfc.getSelectedFile();
             colocarImagen(imagenSeleccionada);
+        }
+    }
+
+
+    /****************************
+     *                           *
+     *   METODOS DE LA VISTA     *
+     *                           *
+     ****************************/
+
+    private void modoEdicion(boolean modo){
+        // Activar/desactivar botones
+        vista.btGuardar.setEnabled(modo);
+        vista.btCancelar.setEnabled(modo);
+
+        // Activar/desactivar campos
+        vista.tfTitulo.setEnabled(modo);
+        vista.taSinopsis.setEnabled(modo);
+        vista.tfValoracion.setEnabled(modo);
+        vista.tfRecaudacion.setEnabled(modo);
+    }
+
+    private void refrescarLista(List<Pelicula> nuevaLista) {
+        vista.modeloPeliculas.removeAllElements();
+        for (Pelicula pelicula: nuevaLista) {
+            vista.modeloPeliculas.addElement(pelicula);
         }
     }
 
@@ -239,15 +298,9 @@ public class Controlador implements ActionListener, MouseListener, DocumentListe
         vista.tfRecaudacion.setText(String.valueOf(pelicula.getRecaudacion()));
         vista.taSinopsis.setText(pelicula.getSinopsis());
 
-        // Colocar la imagen si tiene, y si no, la de por defecto
-        if (pelicula.getImagen().exists()) {
-            colocarImagen(pelicula.getImagen());
-        }
-        else {
-            colocarImagen(new File(DEFAULT_IMAGE));
-        }
-
-        System.out.println(pelicula.getImagen().getPath());
+        // Colocar la imagen de la pelicula si tiene y si no, la imagen por defecto
+        colocarImagen(pelicula.getImagen().exists() ?
+                pelicula.getImagen() : new File(DEFAULT_IMAGE));
     }
 
     private void colocarImagen(File imagen) {
@@ -257,50 +310,29 @@ public class Controlador implements ActionListener, MouseListener, DocumentListe
         vista.pack();
     }
 
-    private Pelicula cogerDatosPelicula(){
-
-        String titulo, sinopsis;
-        int valoracion;
-        float recaudacion;
-        File imagen;
-
-        // Verificar datos, con valores por defecto en los casos apropiados
-        if (vista.tfTitulo.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(vista, "El título es necesario", "Error", JOptionPane.ERROR_MESSAGE);
-            return null;
-        }
-        titulo = vista.tfTitulo.getText();
-        sinopsis = vista.taSinopsis.getText();
-        valoracion = vista.tfValoracion.getText().isEmpty() ?
-                0 : Integer.parseInt(vista.tfValoracion.getText());
-        recaudacion = vista.tfRecaudacion.getText().isEmpty() ?
-                0 : Float.parseFloat(vista.tfRecaudacion.getText());
-        imagen = imagenSeleccionada != null? imagenSeleccionada : new File(DEFAULT_IMAGE);
-
-        // Construir la pelicula y devolverla
-        Pelicula pelicula = new Pelicula();
-        pelicula.setTitulo(titulo);
-        pelicula.setSinopsis(sinopsis);
-        pelicula.setValoracion(valoracion);
-        pelicula.setRecaudacion(recaudacion);
-        pelicula.setImagen(imagen);
-        return pelicula;
-    }
-
     @Override
     public void insertUpdate(DocumentEvent e) {
+        // Cargar la lista que devuelve lo que haya en la caja de busqueda
         refrescarLista(modelo.getPeliculas(vista.tfBusqueda.getText()));
     }
 
     @Override
     public void removeUpdate(DocumentEvent e) {
+        // Cargar la lista que devuelve lo que haya en la caja de busqueda
         refrescarLista(modelo.getPeliculas(vista.tfBusqueda.getText()));
     }
+
+
+
+    /****************************
+     *                           *
+     *   LISTENERS VACIOS        *
+     *                           *
+     ****************************/
 
     @Override
     public void changedUpdate(DocumentEvent e) {
     }
-
 
     @Override
     public void mousePressed(MouseEvent e) {

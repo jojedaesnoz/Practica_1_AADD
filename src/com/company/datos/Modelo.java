@@ -3,14 +3,12 @@ package com.company.datos;
 import com.company.base.Pelicula;
 import com.company.util.Util;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.company.util.Constantes.RUTA_DATOS;
 import static com.company.util.Constantes.RUTA_IMAGENES;
 import static com.company.util.Constantes.RUTA_PELICULAS;
 
@@ -32,12 +30,12 @@ public class Modelo {
         limpiarImagenesSobrantes();
     }
 
+
     public void guardarPelicula(Pelicula nueva) throws IOException {
         guardarPelicula(nueva, RUTA_PELICULAS);
     }
 
     public void guardarPelicula(Pelicula nueva, String destino) throws IOException {
-
         // Construir la imagen de destino
         File imagenFuente = nueva.getImagen();
         String[] partes = imagenFuente.getName().split("[.]");
@@ -69,8 +67,6 @@ public class Modelo {
         }
         return null;
     }
-
-    //todo busqueda, recuperarborrado, cambiarRutaGuardado, borrarTodo
 
     private void cargarDeDisco() throws IOException, ClassNotFoundException {
         peliculas = Util.deserialize(RUTA_PELICULAS);
@@ -107,9 +103,10 @@ public class Modelo {
 
         ultimaBorrada = pelicula;
         peliculas.remove(pelicula);
-//        guardarADisco();
+        guardarADisco(RUTA_PELICULAS);
     }
 
+    // Borra las imagenes que no esten siendo usadas por ninguna pelicula
     private void limpiarImagenesSobrantes(){
         ArrayList<File> imagenesUsadas = new ArrayList<>();
         for (Pelicula pelicula: peliculas) {

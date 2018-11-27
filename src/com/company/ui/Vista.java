@@ -4,7 +4,6 @@ import com.company.base.Pelicula;
 
 import javax.swing.*;
 import java.awt.*;
-import java.time.Year;
 
 public class Vista extends JFrame {
 
@@ -30,7 +29,6 @@ public class Vista extends JFrame {
     }
 
     private void inicializarComponentes() {
-
         // LABELS
         lTitulo = new JLabel("Título", SwingConstants.CENTER);
         lSinopsis = new JLabel("Sinopsis", SwingConstants.CENTER);
